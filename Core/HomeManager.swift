@@ -33,11 +33,11 @@ class HomeManager {
         for i in 0..<colors {
             for j in 0..<colors {
                 let inputExtent = CIVector(x: (extent.size.width / CGFloat(colors)) * CGFloat(i), y: (extent.size.height / CGFloat(colors)) * CGFloat(j), z: extent.size.width / CGFloat(colors), w: extent.size.height / CGFloat(colors))
-                guard let outputImage = CIFilter(name: "CIAreaAverage", withInputParameters: [kCIInputImageKey: image, kCIInputExtentKey: inputExtent])?.outputImage else {
+                guard let outputImage = CIFilter(name: "CIAreaAverage", parameters: [kCIInputImageKey: image, kCIInputExtentKey: inputExtent])?.outputImage else {
                     break
                 }
                 var bitmap = [UInt8](repeating: 0, count: 4)
-                CIContext().render(outputImage, toBitmap: &bitmap, rowBytes: 4, bounds: CGRect(x: 0, y: 0, width: 1, height: 1), format: kCIFormatRGBA8, colorSpace: CGColorSpaceCreateDeviceRGB())
+                CIContext().render(outputImage, toBitmap: &bitmap, rowBytes: 4, bounds: CGRect(x: 0, y: 0, width: 1, height: 1), format: CIFormat.RGBA8, colorSpace: CGColorSpaceCreateDeviceRGB())
                 samples.append(bitmap)
             }
         }
@@ -51,7 +51,12 @@ class HomeManager {
         var colorIndex = 0
         for lightbulbService in lightbulbServices {
             var HSBA = [CGFloat](repeating: 0, count: 4)
-            colors[colorIndex % colors.count].getHue(&HSBA[0], saturation: &HSBA[1], brightness: &HSBA[2], alpha: &HSBA[3])
+            var h = HSBA[0]
+            var s = HSBA[1]
+            var b = HSBA[2]
+            var a = HSBA[3]
+            let color = colors[colorIndex % colors.count]
+            color.getHue(&h, saturation: &s, brightness: &b, alpha: &a)
             for characteristic in lightbulbService.characteristics {
                 guard updating[characteristic] == nil || updating[characteristic] == false else {
                     break

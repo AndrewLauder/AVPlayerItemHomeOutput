@@ -30,7 +30,7 @@ public class AVPlayerItemHomeOutput: AVPlayerItemVideoOutput {
         super.init(pixelBufferAttributes: nil)
         super.setDelegate(self, queue: DispatchQueue(label: "AVPlayerItemHomeOutput (\(playerItem))", qos: .userInteractive, attributes: .concurrent, autoreleaseFrequency: .inherit, target: nil))
         displayLink = CADisplayLink(target: self, selector: #selector(displayLinkCallback))
-        displayLink.add(to: .current, forMode: .defaultRunLoopMode)
+        displayLink.add(to: .current, forMode: RunLoop.Mode.default)
         displayLink.isPaused = true
     }
 
@@ -39,7 +39,7 @@ public class AVPlayerItemHomeOutput: AVPlayerItemVideoOutput {
         userDelegateQueue = delegateQueue
     }
 
-    func displayLinkCallback() {
+    @objc func displayLinkCallback() {
         delegateQueue?.async {
             let outputItemTime = self.itemTime(forHostTime: self.displayLink.timestamp + self.displayLink.duration)
             if self.hasNewPixelBuffer(forItemTime: outputItemTime), let pixelBuffer = self.copyPixelBuffer(forItemTime: outputItemTime, itemTimeForDisplay: nil) {
